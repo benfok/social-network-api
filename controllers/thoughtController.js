@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const { Thought, User } = require('../models');
 
 module.exports = {
@@ -130,10 +131,10 @@ module.exports = {
       deleteReaction(req, res) {
         Thought.findOneAndUpdate(
             { _id: req.params.thoughtId },
-            { $pull: { reactions: { reactionId: req.body } } },
+            { $pull: { reactions: { reactionId: mongoose.Types.ObjectId(req.body.reactionId) } } },
             { runValidators: true, new: true } // run validation on data entry and return newly updated instance of Thought
         )
-        .then((thoguht) =>
+        .then((thought) =>
             !thought
                 ? res.status(404).json({ message: ' A thought with this ID does not exist'})
                 : res.status(200).json(thought)
