@@ -31,7 +31,7 @@ module.exports = {
     // create a thought
     // req.body example: {"thoughtText": "Here's a cool thought...", "userId": "5edff358a0fcb779aa7b118b" }      
     createThought(req, res) {
-        // first check that the user exists, because a thoguht cannot exist without a valid userId
+        // first check that the user exists, because a thought cannot exist without a valid userId
         User.findOne({ _id: req.body.userId })
         .then((user) => {
             if (!user) {
@@ -54,6 +54,10 @@ module.exports = {
                     return res.status(500).json(err);
                 })
             }
+        })
+        .catch((err) => {
+            console.log(err);
+            return res.status(500).json(err);
         })
     },
 
@@ -78,25 +82,31 @@ module.exports = {
     // delete a thought by Id
     deleteThought(req, res) {
         Thought.findOneAndRemove({ _id: req.params.thoughtId })
-            .then((thought) => 
-                !thought   
-                    ? res.json({ message: 'No thought exists with this ID'})
-                    : User.findOneAndUpdate(
-                        { username: thought.username },
-                        { $pull: { thoughts: req.params.thoughtId } },
-                        { runValidators: true, new: true } // run validation on data entry and return newly updated instance of User
+            .then((thought) => {
+                if(!thought) {
+                        return res.json({ message: 'No thought exists with this ID'}) 
+                } else {
+                        User.findOneAndUpdate(
+                            { username: thought.username },
+                            { $pull: { thoughts: req.params.thoughtId } },
+                            { runValidators: true, new: true } // run validation on data entry and return newly updated instance of User
+                        )
+                    .then((user) =>
+                        !user
+                        ? res.status(404).json({ message: 'Thought deleted, but no user found with the associated user ID' })
+                        : res.status(200).json({ message: 'Thought successfully deleted and removed from user record' })
                     )
-            )
-            .then((user) =>
-                !user
-                ? res.status(404).json({ message: 'Thought deleted, but no user found with the associated user ID' })
-                : res.status(200).json({ message: 'Thought successfully deleted and removed from user record' })
-            )
+                    .catch((err) => {
+                        console.log(err);
+                        return res.status(500).json(err);
+                    });
+                }
+            })
             .catch((err) => {
                 console.log(err);
                 return res.status(500).json(err);
-            });
-      },
+            })
+        },
 
       // add a reaction
       addReaction(req, res) {
@@ -105,7 +115,7 @@ module.exports = {
             { $addToSet: { reactions: req.body } },
             { runValidators: true, new: true } // run validation on data entry and return newly updated instance of Thought
         )
-        .then((thoguht) =>
+        .then((thought) =>
             !thought
                 ? res.status(404).json({ message: ' A thought with this ID does not exist'})
                 : res.status(200).json(thought)

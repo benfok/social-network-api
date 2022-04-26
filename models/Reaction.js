@@ -5,8 +5,8 @@ const { formatDate } = require('../utils/utils');
 const reactionSchema = new mongoose.Schema(
     {
         reactionId: {
-            type: mongoose.Schema.Types.ObjectId,
-            default: () => new Types.ObjectId(),
+            type: mongoose.Types.ObjectId,
+            default: () => new mongoose.Types.ObjectId()
         },
         reactionBody: {
             type: String,
@@ -26,7 +26,7 @@ const reactionSchema = new mongoose.Schema(
     },
     {
         toJSON: { getters: true },
-        id: false
+        _id: false
     }
 );
 

@@ -75,7 +75,6 @@ module.exports = {
   
     // Add a friend to a user. Requires that the user id 'userId' and the friend id 'friendId' be passed in the URL
     addFriend(req, res) {
-      console.log(req.body);
       User.findOneAndUpdate(
         { _id: req.params.userId },
         { $addToSet: { friends: req.params.friendId } },
