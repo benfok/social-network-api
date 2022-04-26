@@ -45,7 +45,7 @@ module.exports = {
                     return User.findOneAndUpdate(  //
                         { _id: req.body.userId},
                         { $addToSet: { thoughts: thought._id } },
-                        { runValidators: true, new: true }
+                        { runValidators: true, new: true } // run validation on data entry and return newly updated instance of User
                     );
                 })
                 .then((thought) => res.status(200).json(thought))
@@ -62,7 +62,7 @@ module.exports = {
         Thought.findOneAndUpdate(
             { _id: req.params.thoughtId },
             { $set: { thoughtText: req.body.thoughtText } },
-            { runValidators: true, new: true }
+            { runValidators: true, new: true } // run validation on data entry and return newly updated instance of Thought
         )
             .then((thought) =>
             !thought
@@ -84,7 +84,7 @@ module.exports = {
                     : User.findOneAndUpdate(
                         { username: thought.username },
                         { $pull: { thoughts: req.params.thoughtId } },
-                        { runValidators: true, new: true }
+                        { runValidators: true, new: true } // run validation on data entry and return newly updated instance of User
                     )
             )
             .then((user) =>
@@ -97,7 +97,42 @@ module.exports = {
                 return res.status(500).json(err);
             });
       },
-    
+
+      // add a reaction
+      createReaction(req, res) {
+        Thought.findOneAndUpdate(
+            { _id: req.params.thoughtId },
+            { $addToSet: { reactions: req.body } },
+            { runValidators: true, new: true } // run validation on data entry and return newly updated instance of Thought
+        )
+        .then((thoguht) =>
+            !thought
+                ? res.status(404).json({ message: ' A thought with this ID does not exist'})
+                : res.status(200).json(thought)
+        )
+        .catch((err) => {
+        console.log(err);
+        return res.status(500).json(err);
+        });        
+      },
+
+      // delete a reaction
+      deleteReaction(req, res) {
+        Thought.findOneAndUpdate(
+            { _id: req.params.thoughtId },
+            { $pull: { reactions: { reactionId: req.body } } },
+            { runValidators: true, new: true } // run validation on data entry and return newly updated instance of Thought
+        )
+        .then((thoguht) =>
+            !thought
+                ? res.status(404).json({ message: ' A thought with this ID does not exist'})
+                : res.status(200).json(thought)
+        )
+        .catch((err) => {
+        console.log(err);
+        return res.status(500).json(err);
+        });        
+      },
 
     
 }
